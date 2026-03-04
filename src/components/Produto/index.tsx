@@ -1,11 +1,11 @@
-import { Produto as ProdutoType } from '../../App'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { adicionarAoCarrinho } from '../../store/slices/carrinhoSlice'
+import { alternarFavorito } from '../../store/slices/favoritosSlice'
+import { Produto as ProdutoType } from '../../types/Produto'
 import * as S from './styles'
 
 type Props = {
   produto: ProdutoType
-  aoComprar: (produto: ProdutoType) => void
-  favoritar: (produto: ProdutoType) => void
-  estaNosFavoritos: boolean
 }
 
 export const paraReal = (valor: number) =>
@@ -13,12 +13,20 @@ export const paraReal = (valor: number) =>
     valor
   )
 
-const ProdutoComponent = ({
-  produto,
-  aoComprar,
-  favoritar,
-  estaNosFavoritos
-}: Props) => {
+const ProdutoComponent = ({ produto }: Props) => {
+  const dispatch = useAppDispatch()
+  const favoritos = useAppSelector((state) => state.favoritos.itens)
+
+  const estaNosFavoritos = favoritos.some((p) => p.id === produto.id)
+
+  const handleAdicionarAoCarrinho = () => {
+    dispatch(adicionarAoCarrinho(produto))
+  }
+
+  const handleFavoritar = () => {
+    dispatch(alternarFavorito(produto))
+  }
+
   return (
     <S.Produto>
       <S.Capa>
@@ -28,12 +36,12 @@ const ProdutoComponent = ({
       <S.Prices>
         <strong>{paraReal(produto.preco)}</strong>
       </S.Prices>
-      <S.BtnComprar onClick={() => favoritar(produto)} type="button">
+      <S.BtnComprar onClick={handleFavoritar} type="button">
         {estaNosFavoritos
           ? '- Remover dos favoritos'
           : '+ Adicionar aos favoritos'}
       </S.BtnComprar>
-      <S.BtnComprar onClick={() => aoComprar(produto)} type="button">
+      <S.BtnComprar onClick={handleAdicionarAoCarrinho} type="button">
         Adicionar ao carrinho
       </S.BtnComprar>
     </S.Produto>
